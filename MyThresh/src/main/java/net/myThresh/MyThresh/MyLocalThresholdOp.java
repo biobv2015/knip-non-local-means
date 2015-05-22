@@ -90,20 +90,5 @@ public class MyLocalThresholdOp<T extends RealType<T>> implements Op {
 		}
 		
 	}
-	public static void main(final String... args) throws Exception {
-		final ImageJ ij = new ImageJ();
-
-		//Open an image to work with in imagej
-		File file = new File( "C:/Users/fv/Desktop/test/blobs.tif" );
-		ImagePlus imp =  new Opener().openImage( file.getAbsolutePath() );
-
-        ij.ui().showUI();
-        
-		// Run our op
-		final Object threshimg = ij.op().run("my_local_threshold", imp, 2);
-
-		// And display the result!
-		ij.ui().show(threshimg);
-	}
 
 }
