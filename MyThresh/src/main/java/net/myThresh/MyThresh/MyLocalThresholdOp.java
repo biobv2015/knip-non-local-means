@@ -12,12 +12,9 @@ import net.imagej.ops.Op;
 import net.imagej.ops.OpService;
 import net.imagej.ops.map.Map;
 import net.imglib2.Cursor;
-import net.imglib2.EuclideanSpace;
-import net.imglib2.FinalInterval;
 import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.neighborhood.Neighborhood;
-import net.imglib2.algorithm.neighborhood.RectangleNeighborhood;
 import net.imglib2.algorithm.neighborhood.RectangleNeighborhoodSkipCenter;
 import net.imglib2.algorithm.neighborhood.RectangleShape;
 import net.imglib2.algorithm.neighborhood.Shape;
@@ -28,7 +25,6 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
-import net.imglib2.view.ExtendedRandomAccessibleInterval;
 import net.imglib2.view.Views;
 
 import org.scijava.ItemIO;
@@ -107,6 +103,20 @@ public class MyLocalThresholdOp<T extends RealType<T>> implements Op {
 		}
 		
 	}
-	
+	public static void main(final String... args) throws Exception {
+		final ImageJ ij = new ImageJ();
+
+		//Open an image to work with in imagej
+		File file = new File( "C:/Users/fv/Desktop/test/blobs.tif" );
+		ImagePlus imp =  new Opener().openImage( file.getAbsolutePath() );
+
+        ij.ui().showUI();
+        
+		// Run our op
+		final Object threshimg = ij.op().run("my_local_threshold", imp, 1);
+
+		// And display the result!
+		ij.ui().show(threshimg);
+	}
 
 }
