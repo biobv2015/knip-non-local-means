@@ -11,7 +11,14 @@ import net.imagej.ops.Function;
 import net.imagej.ops.Op;
 import net.imagej.ops.OpService;
 import net.imagej.ops.map.Map;
+import net.imglib2.Cursor;
+import net.imglib2.EuclideanSpace;
+import net.imglib2.FinalInterval;
+import net.imglib2.RandomAccessible;
+import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.algorithm.neighborhood.Neighborhood;
+import net.imglib2.algorithm.neighborhood.RectangleNeighborhood;
+import net.imglib2.algorithm.neighborhood.RectangleNeighborhoodSkipCenter;
 import net.imglib2.algorithm.neighborhood.RectangleShape;
 import net.imglib2.algorithm.neighborhood.Shape;
 import net.imglib2.img.Img;
@@ -21,6 +28,8 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
+import net.imglib2.view.ExtendedRandomAccessibleInterval;
+import net.imglib2.view.Views;
 
 import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
@@ -47,11 +56,24 @@ public class MyLocalThresholdOp<T extends RealType<T>> implements Op {
 		
 		ImgFactory<BitType> fac = new ArrayImgFactory<BitType>();	
 
-		res = fac.create(in, new BitType());
+		RandomAccessible<T> border = Views.extendMirrorSingle(in);
+		
+		long[] min = new long[in.numDimensions()];
+		long[] max = new long[in.numDimensions()];
+		
+		for (int i = 0; i < max.length; i++) {
+			min[i]=0; max[i]=in.dimension(i);
+		}
+
+		RandomAccessibleInterval<T> borderCropped = Views.interval(border, min, max);
+
+		res = fac.create(borderCropped, new BitType());
 		
 		Shape shape = new RectangleShape(span, true);
+				
+		RandomAccessibleInterval<T> borderCroppedOffset = Views.offsetInterval(border, borderCropped);
 		
-		Iterable<Neighborhood<T>> neighbors = shape.neighborhoodsSafe(in);
+		Iterable<Neighborhood<T>> neighbors = shape.neighborhoodsSafe(borderCroppedOffset);
 		
 		Function<Iterable<T>, BitType> func = new My_Mean<Iterable<T>, BitType>();
 		
@@ -67,20 +89,15 @@ public class MyLocalThresholdOp<T extends RealType<T>> implements Op {
 			T mean = (T) new DoubleType();
 			mean = (T) ops.mean(mean, input);
 			
-			// loop implementation of mean for testing purposes
-//			Cursor<T> cur = (Cursor<T>) input.iterator();
-//			double sum = 0;
-//			int count = 0;
-//			while (cur.hasNext()) {
-//				T t = (T) cur.next();
-//				count++;
-//				sum += t.getRealDouble();
-//			}
-//			double value = sum/count;
-//			mean.setReal(value);
+			//Not sure if the real center is found 
+			RectangleNeighborhoodSkipCenter<T> currentNeighbors = (RectangleNeighborhoodSkipCenter) input;
 			
-			//compare to center (atm fixed threshold, needs rework of neighborhood)
-			if(mean.getRealDouble()>100){
+			long centerPosition = (currentNeighbors.size()-1)/2+1;
+			Cursor<T> centerCursor = currentNeighbors.cursor();
+			centerCursor.jumpFwd(centerPosition);
+			T center = centerCursor.get();
+			
+			if(mean.getRealDouble()<center.getRealDouble()){
 				output.set(true);
 			}else{
 				output.set(false);
@@ -89,21 +106,6 @@ public class MyLocalThresholdOp<T extends RealType<T>> implements Op {
 			return output;
 		}
 		
-	}
-	public static void main(final String... args) throws Exception {
-		final ImageJ ij = new ImageJ();
-
-		//Open an image to work with in imagej
-		File file = new File( "C:/Users/fv/Desktop/test/blobs.tif" );
-		ImagePlus imp =  new Opener().openImage( file.getAbsolutePath() );
-
-        ij.ui().showUI();
-        
-		// Run our op
-		final Object threshimg = ij.op().run("my_local_threshold", imp, 2);
-
-		// And display the result!
-		ij.ui().show(threshimg);
 	}
 
 }
