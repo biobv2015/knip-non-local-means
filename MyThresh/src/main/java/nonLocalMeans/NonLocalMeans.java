@@ -17,6 +17,7 @@ import net.imglib2.algorithm.neighborhood.Shape;
 import net.imglib2.img.Img;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
@@ -105,8 +106,23 @@ public class NonLocalMeans<T extends RealType<T>> implements Op{
 				
 				Function<NeighborhoodPair<T>, Neighborhood<T>> weightfunc = new WeightingFunction<NeighborhoodPair<T>, Neighborhood<T>, T>(); 
 			
+				Neighborhood<T> weights = (Neighborhood<T>) ops.map(copy, nbhPairs, weightfunc);
 				
+				T nbhsum = (T) new DoubleType();
+				nbhsum.setZero();
+				nbhsum = (T) ops.sum(nbhsum, weights);
 				
+				double res_ = 0;
+				Cursor<T> resCursor = weights.cursor();
+				while(resCursor.hasNext()){
+					T qweight = resCursor.next();
+					res_ += p.getRealDouble()*qweight.getRealDouble();
+				}
+				
+				T result = (T) new DoubleType();
+				result.setReal((1/nbhsum.getRealDouble())*res_);
+				p.set(result);
+						
 			}
 			
 		}

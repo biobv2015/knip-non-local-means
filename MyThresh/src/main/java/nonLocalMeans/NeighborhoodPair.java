@@ -8,4 +8,6 @@ public class NeighborhoodPair<T> {
 	T p;
 	Neighborhood<T> qNeighbors;
 	T q;
+	//workaround
+	double sigma;
 }
