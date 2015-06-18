@@ -1,9 +1,12 @@
 package nonLocalMeans;
 
 import ij.ImagePlus;
+import ij.io.Opener;
 
+import java.io.File;
 import java.util.ArrayList;
 
+import net.imagej.ImageJ;
 import net.imagej.ops.Function;
 import net.imagej.ops.Op;
 import net.imagej.ops.OpService;
@@ -15,6 +18,7 @@ import net.imglib2.algorithm.neighborhood.Neighborhood;
 import net.imglib2.algorithm.neighborhood.RectangleShape;
 import net.imglib2.algorithm.neighborhood.Shape;
 import net.imglib2.img.Img;
+import net.imglib2.img.ImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
@@ -54,9 +58,13 @@ public class NonLocalMeans<T extends RealType<T>> implements Op{
 		long[] max = new long[in.numDimensions()];
 		
 		for (int i = 0; i < max.length; i++) {
-			min[i]=0; max[i]=in.dimension(i);
+			min[i]=0-span; max[i]=in.dimension(i)+span;
 		}
 
+		ImgFactory<T> fac = in.factory();
+		
+		outputImage = fac.create(in, in.firstElement());
+		
 		RandomAccessibleInterval<T> borderCropped = Views.interval(border, min, max);
 		
 		Shape shape = new RectangleShape((int) span, true);
@@ -64,12 +72,15 @@ public class NonLocalMeans<T extends RealType<T>> implements Op{
 		RandomAccessibleInterval<T> borderCroppedOffset = Views.offsetInterval(border, borderCropped);
 		
 		Cursor<T> pCursor = in.cursor();
+		Cursor<T> outCursor = outputImage.cursor();
 		
 		Iterable<Neighborhood<T>> neighbors = shape.neighborhoodsSafe(borderCroppedOffset);
 		
-		for(int i = 0; i<=in.dimension(0);i++){
-			for(int j = 0;j<=in.dimension(1);j++){
+		while(pCursor.hasNext()){
+		//for(int i = 0; i<=in.dimension(0);i++){
+			//for(int j = 0;j<=in.dimension(1);j++){
 				T p = pCursor.next();
+				outCursor.next();
 				int xPos = pCursor.getIntPosition(0);
 				int yPos = pCursor.getIntPosition(1);
 				
@@ -90,7 +101,8 @@ public class NonLocalMeans<T extends RealType<T>> implements Op{
 				//create all neighborhoodpairs for map op
 				ArrayList<NeighborhoodPair<T>> nbhPairs = new ArrayList<NeighborhoodPair<T>>();
 				
-				Neighborhood<T> copy = (Neighborhood<T>) ops.createimg(pNeighbors);
+				Img<T> copy = fac.create(pNeighbors, pNeighbors.firstElement());
+				
 				Cursor<T> pNCursor = pNeighbors.cursor();
 				Cursor<T> copyCursor = copy.cursor();
 				while (pNCursor.hasNext()) {
@@ -104,9 +116,9 @@ public class NonLocalMeans<T extends RealType<T>> implements Op{
 					nbhPairs.add(toAdd);
 				}
 				
-				Function<NeighborhoodPair<T>, Neighborhood<T>> weightfunc = new WeightingFunction<NeighborhoodPair<T>, Neighborhood<T>, T>(); 
+				Function<NeighborhoodPair<T>, T> weightfunc = new WeightingFunction<NeighborhoodPair<T>, T>(); 
 			
-				Neighborhood<T> weights = (Neighborhood<T>) ops.map(copy, nbhPairs, weightfunc);
+				Img<T> weights = (Img<T>) ops.map(copy, nbhPairs, weightfunc);
 				
 				T nbhsum = (T) new DoubleType();
 				nbhsum.setZero();
@@ -118,12 +130,9 @@ public class NonLocalMeans<T extends RealType<T>> implements Op{
 					T qweight = resCursor.next();
 					res_ += p.getRealDouble()*qweight.getRealDouble();
 				}
-				
-				T result = (T) new DoubleType();
-				result.setReal((1/nbhsum.getRealDouble())*res_);
-				p.set(result);
+				outCursor.get().setReal((1/nbhsum.getRealDouble())*res_);;
 						
-			}
+	//		}
 			
 		}
 		 //iterate over all pixels
@@ -136,6 +145,20 @@ public class NonLocalMeans<T extends RealType<T>> implements Op{
 		
 	}
 	
-	//main method for testing
+	public static void main(final String... args) throws Exception {
+		final ImageJ ij = new ImageJ();
+
+		//Open an image to work with in imagej
+		File file = new File( "C:/Users/fv/Desktop/test/test.tif" );
+		ImagePlus imp =  new Opener().openImage( file.getAbsolutePath() );
+
+        ij.ui().showUI();
+        
+		// Run our op
+		final Object threshimg = ij.op().run("non_local_means", imp, 5, 10);
+
+		// And display the result!
+		ij.ui().show(threshimg);
+	}
 
 }

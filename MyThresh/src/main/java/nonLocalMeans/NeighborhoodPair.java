@@ -1,10 +1,11 @@
 package nonLocalMeans;
 
 import net.imglib2.algorithm.neighborhood.Neighborhood;
+import net.imglib2.img.Img;
 
 public class NeighborhoodPair<T> {
 
-	Neighborhood<T> pNeighbors;
+	Img<T> pNeighbors;
 	T p;
 	Neighborhood<T> qNeighbors;
 	T q;
