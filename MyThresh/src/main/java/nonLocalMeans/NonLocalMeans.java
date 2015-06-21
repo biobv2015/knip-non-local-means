@@ -76,6 +76,8 @@ public class NonLocalMeans<T extends RealType<T>> implements Op{
 		
 		Iterable<Neighborhood<T>> neighbors = shape.neighborhoodsSafe(borderCroppedOffset);
 		
+		boolean trigger = false;
+		
 		while(pCursor.hasNext()){
 		//for(int i = 0; i<=in.dimension(0);i++){
 			//for(int j = 0;j<=in.dimension(1);j++){
@@ -87,8 +89,8 @@ public class NonLocalMeans<T extends RealType<T>> implements Op{
 				int pxmin = (int) (xPos-span>=0?xPos-span:0);
 				int pymin = (int) (yPos-span>=0?yPos-span:0);
 				
-				int pxmax = (int) (xPos+span<=in.dimension(0)?xPos+span:in.dimension(0));
-				int pymax = (int) (yPos+span<=in.dimension(1)?yPos+span:in.dimension(1));
+				int pxmax = (int) (xPos+span<=in.dimension(0)-1?xPos+span:in.dimension(0)-1);
+				int pymax = (int) (yPos+span<=in.dimension(1)-1?yPos+span:in.dimension(1)-1);
 				
 				long[] pmax = {pxmax, pymax};
 				long[] pmin = {pxmin, pymin};
@@ -102,7 +104,7 @@ public class NonLocalMeans<T extends RealType<T>> implements Op{
 				ArrayList<NeighborhoodPair<T>> nbhPairs = new ArrayList<NeighborhoodPair<T>>();
 				
 				Img<T> copy = fac.create(pNeighbors, pNeighbors.firstElement());
-				
+								
 				Cursor<T> pNCursor = pNeighbors.cursor();
 				Cursor<T> copyCursor = copy.cursor();
 				while (pNCursor.hasNext()) {
@@ -115,7 +117,7 @@ public class NonLocalMeans<T extends RealType<T>> implements Op{
 					
 					nbhPairs.add(toAdd);
 				}
-				
+								
 				Function<NeighborhoodPair<T>, T> weightfunc = new WeightingFunction<NeighborhoodPair<T>, T>(); 
 			
 				Img<T> weights = (Img<T>) ops.map(copy, nbhPairs, weightfunc);
@@ -126,11 +128,13 @@ public class NonLocalMeans<T extends RealType<T>> implements Op{
 				
 				double res_ = 0;
 				Cursor<T> resCursor = weights.cursor();
+				Cursor<T> qCursor2 = pNeighbors.cursor();
 				while(resCursor.hasNext()){
 					T qweight = resCursor.next();
-					res_ += p.getRealDouble()*qweight.getRealDouble();
+					T q = qCursor2.next();
+					res_ += q.getRealDouble()*qweight.getRealDouble();
 				}
-				outCursor.get().setReal((1/nbhsum.getRealDouble())*res_);;
+				outCursor.get().setReal((1/nbhsum.getRealDouble())*res_);
 						
 	//		}
 			
@@ -149,13 +153,13 @@ public class NonLocalMeans<T extends RealType<T>> implements Op{
 		final ImageJ ij = new ImageJ();
 
 		//Open an image to work with in imagej
-		File file = new File( "C:/Users/fv/Desktop/test/test.tif" );
+		File file = new File( "C:/Users/fv/Desktop/test/blobs.tif" );
 		ImagePlus imp =  new Opener().openImage( file.getAbsolutePath() );
 
         ij.ui().showUI();
         
 		// Run our op
-		final Object threshimg = ij.op().run("non_local_means", imp, 5, 10);
+		final Object threshimg = ij.op().run("non_local_means", imp, 1, 3);
 
 		// And display the result!
 		ij.ui().show(threshimg);
