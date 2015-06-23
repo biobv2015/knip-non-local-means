@@ -2,14 +2,17 @@ package nonLocalMeans;
 
 import net.imagej.ops.AbstractStrictFunction;
 import net.imglib2.Cursor;
+import net.imglib2.type.numeric.ARGBDoubleType;
+import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 
-public class WeightingFunction<I extends NeighborhoodPair<O>, O extends RealType<O>>
+public class WeightingFunctionRGB<I extends NeighborhoodPair<O>, O extends NumericType<O>>
 		extends AbstractStrictFunction<I, O> {
 
+	@Override
 	public O compute(I input, O output) {
-
 		// TODO set h depending on sigma
 
 		double maxdistance = 0;
@@ -22,9 +25,9 @@ public class WeightingFunction<I extends NeighborhoodPair<O>, O extends RealType
 			maxdistance = dist - sigma2;
 		}
 
-		DoubleType result = new DoubleType();
+		ARGBDoubleType result = new ARGBDoubleType();
 
-		result.setReal(Math.pow((Math.E), (-(maxdistance / h))));
+		result.setA(Math.pow((Math.E), (-(maxdistance / h))));
 
 		return (O) result;
 	}
@@ -39,11 +42,16 @@ public class WeightingFunction<I extends NeighborhoodPair<O>, O extends RealType
 		while (pCursor.hasNext()) {
 			pCursor.next();
 			qCursor.next();
-			dresult += Math.pow(pCursor.get().getRealDouble()
-					- qCursor.get().getRealDouble(), 2);
+			// TODO
+			int pValue = ((ARGBType) pCursor.get()).get();
+			int qValue = ((ARGBType) qCursor.get()).get();
+			dresult += Math.pow(ARGBType.blue(pValue) - ARGBType.blue(qValue),2); 
+			dresult += Math.pow(ARGBType.green(pValue) - ARGBType.green(qValue),2); 
+			dresult += Math.pow(ARGBType.red(pValue) - ARGBType.red(qValue),2); 
+
 		}
 
-		dresult = dresult / Math.pow((input.pNeighbors.dimension(0)), 2);
+		dresult = dresult / (3 * Math.pow((input.pNeighbors.dimension(0)), 2));
 
 		return dresult;
 
