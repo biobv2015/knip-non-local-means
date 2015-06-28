@@ -47,9 +47,8 @@ public class NonLocalMeansGrayscale<T extends RealType<T>> implements Op {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-
 		Img<T> in = ImageJFunctions.wrapReal(inputImage);
-
+		
 		RandomAccessible<T> border = Views.extendZero(in);
 
 		long[] min = new long[in.numDimensions()];
@@ -120,7 +119,7 @@ public class NonLocalMeansGrayscale<T extends RealType<T>> implements Op {
 				NeighborhoodPair<T> toAdd = new NeighborhoodPair<T>();
 				toAdd.pNeighbors = copy;
 				toAdd.qNeighbors = qCursor.get();
-
+				toAdd.sigma=sigma;
 				nbhPairs.add(toAdd);
 			}
 
@@ -143,6 +142,7 @@ public class NonLocalMeansGrayscale<T extends RealType<T>> implements Op {
 			outCursor.get().setReal((1 / nbhsum.getRealDouble()) * res_);
 
 		}
+		ImageJFunctions.show(outputImage);
 
 	}
 

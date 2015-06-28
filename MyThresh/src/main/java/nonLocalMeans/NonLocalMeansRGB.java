@@ -123,7 +123,7 @@ public class NonLocalMeansRGB<T extends NumericType<T>> implements Op {
 				NeighborhoodPair<T> toAdd = new NeighborhoodPair<T>();
 				toAdd.pNeighbors = copy;
 				toAdd.qNeighbors = qCursor.get();
-
+				toAdd.sigma=sigma;
 				nbhPairs.add(toAdd);
 			}
 
@@ -131,41 +131,31 @@ public class NonLocalMeansRGB<T extends NumericType<T>> implements Op {
 
 			Img<T> weights = (Img<T>) ops.map(copy, nbhPairs, weightfunc);
 
-			DoubleType nbhsum = new DoubleType();
-			nbhsum.set(calcsum(weights));
-			
-
 			double res_r = 0;
 			double res_g = 0;
 			double res_b = 0;
+			double wsum = 0;
 			Cursor<T> resCursor = weights.cursor();
 			Cursor<T> qCursor2 = pNeighbors.cursor();
 			while (resCursor.hasNext()) {
 				T qweight = resCursor.next();
 				double weight = ((ARGBType)qweight).get();
+				
+				wsum += weight;
+				
 				T q = qCursor2.next();
 				int qValue = ((ARGBType) q).get();
 				res_r += ARGBType.red(qValue) * weight;
 				res_g += ARGBType.green(qValue) * weight;
 				res_b += ARGBType.blue(qValue) * weight;
 			}
-			res_r = res_r/ nbhsum.getRealDouble();
-			res_g = res_g/ nbhsum.getRealDouble();
-			res_b = res_b/ nbhsum.getRealDouble();
+			res_r = res_r/ wsum;
+			res_g = res_g/ wsum;
+			res_b = res_b/ wsum;
 			outCursor.get().set((T) new ARGBType(ARGBType.rgba(res_r, res_g, res_b, 0)));
 
 		}
 		ImageJFunctions.show(outputImage);
 
 	}
-	private double calcsum(Img<T> weights){
-		Cursor<T> c = weights.cursor();
-		double result = 0;
-		while(c.hasNext()){
-			T cur = c.next();
-			result += ((ARGBType) cur).get();  
-		}
-		return result; 
-	}
-
 }

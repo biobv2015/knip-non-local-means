@@ -10,12 +10,19 @@ public class WeightingFunction<I extends NeighborhoodPair<O>, O extends RealType
 
 	public O compute(I input, O output) {
 
-		// TODO set h depending on sigma
-
+		double h=0.4;
+		if(input.sigma<=30){
+			h=0.4*input.sigma;
+		}else if(input.sigma>30&&input.sigma<=75){
+			h=0.35*input.sigma;
+		}else if(input.sigma>75){
+			h=0.3*input.sigma;
+		}
+		
 		double maxdistance = 0;
-		double h = 0.4;
 
 		double sigma2 = 2 * Math.pow(input.sigma, 2);
+
 		double dist = calcDistance(input);
 
 		if (maxdistance < (dist - sigma2)) {
@@ -24,7 +31,7 @@ public class WeightingFunction<I extends NeighborhoodPair<O>, O extends RealType
 
 		DoubleType result = new DoubleType();
 
-		result.setReal(Math.pow((Math.E), (-(maxdistance / h))));
+		result.setReal(Math.pow((Math.E), (-(maxdistance / Math.pow(h, 2)))));
 
 		return (O) result;
 	}

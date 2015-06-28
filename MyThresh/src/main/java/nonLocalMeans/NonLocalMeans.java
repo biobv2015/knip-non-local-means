@@ -51,25 +51,27 @@ public class NonLocalMeans<T extends NumericType<T>> implements Op{
 	public void run() {
 		
 		if(inputImage.getBitDepth()==24){
-			outputImage = (Img<T>) ops.run("non_local_means_rgb", inputImage, 1, 3);	
+			outputImage = (Img<T>) ops.run("non_local_means_rgb", inputImage, sigma, span);	
 		}else{
-			outputImage = (Img<T>) ops.run("non_local_means_gs", inputImage, 1, 3);
+			outputImage = (Img<T>) ops.run("non_local_means_gs", inputImage, sigma, span);
 		}
 		
 	}
 	
 	public static void main(final String... args) throws Exception {
+		long startTime = System.currentTimeMillis();
 		final ImageJ ij = new ImageJ();
 
 		//Open an image to work with in imagej
-		File file = new File( "C:/Users/fv/Desktop/test/ctest.tif" );
+		File file = new File( "C:/Users/fv/Desktop/test/test.tif" );
 		ImagePlus imp =  new Opener().openImage( file.getAbsolutePath() );
 
-        ij.ui().showUI();
+        //ij.ui().showUI();
         
 		// Run our op
-		final Object threshimg = ij.op().run("non_local_means", imp, 3, 1);
-
+		final Object threshimg = ij.op().run("non_local_means", imp, 15, 3);
+		long stopTime = System.currentTimeMillis();
+		System.out.println((stopTime-startTime) + " ms overall");
 		// And display the result!
 		//ij.ui().show(threshimg);
 	}

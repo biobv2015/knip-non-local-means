@@ -16,18 +16,26 @@ public class WeightingFunctionRGB<I extends NeighborhoodPair<O>, O extends Numer
 		// TODO set h depending on sigma
 
 		double maxdistance = 0;
-		double h = 0.4;
+		double h=0.4;
+		if(input.sigma<=25){
+			h=0.55*input.sigma;
+		}else if(input.sigma>25&&input.sigma<=55){
+			h=0.4*input.sigma;
+		}else if(input.sigma>55){
+			h=0.35*input.sigma;
+		}
 
 		double sigma2 = 2 * Math.pow(input.sigma, 2);
 		double dist = calcDistance(input);
 
+		
 		if (maxdistance < (dist - sigma2)) {
 			maxdistance = dist - sigma2;
 		}
 
 		ARGBDoubleType result = new ARGBDoubleType();
 
-		result.setA(Math.pow((Math.E), (-(maxdistance / h))));
+		result.setA(Math.pow((Math.E), (-(maxdistance / Math.pow(h, 2)))));
 
 		return (O) result;
 	}
