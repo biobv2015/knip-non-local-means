@@ -21,7 +21,7 @@ public class WeightingFunction<I extends NeighborhoodPair<O>, O extends RealType
 		
 		double maxdistance = 0;
 
-		double sigma2 = 2 * Math.pow(input.sigma, 2);
+		double sigma2 = 2 * input.sigma*input.sigma;
 
 		double dist = calcDistance(input);
 
@@ -31,7 +31,7 @@ public class WeightingFunction<I extends NeighborhoodPair<O>, O extends RealType
 
 		DoubleType result = new DoubleType();
 
-		result.setReal(Math.pow((Math.E), (-(maxdistance / Math.pow(h, 2)))));
+		result.setReal(Math.pow((Math.E), (-(maxdistance / (h*h)))));
 
 		return (O) result;
 	}
@@ -46,11 +46,12 @@ public class WeightingFunction<I extends NeighborhoodPair<O>, O extends RealType
 		while (pCursor.hasNext()) {
 			pCursor.next();
 			qCursor.next();
-			dresult += Math.pow(pCursor.get().getRealDouble()
-					- qCursor.get().getRealDouble(), 2);
+			dresult += (pCursor.get().getRealDouble()
+					- qCursor.get().getRealDouble())*(pCursor.get().getRealDouble()
+					- qCursor.get().getRealDouble());
 		}
 
-		dresult = dresult / Math.pow((input.pNeighbors.dimension(0)), 2);
+		dresult = dresult / input.pNeighbors.dimension(0)*input.pNeighbors.dimension(0);
 
 		return dresult;
 

@@ -74,25 +74,17 @@ public class NonLocalMeansGrayscale<T extends RealType<T>> implements Op {
 		Cursor<T> pCursor = in.cursor();
 		Cursor<T> outCursor = outputImage.cursor();
 
-		Iterable<Neighborhood<T>> neighbors = shape
-				.neighborhoodsSafe(borderCroppedOffset);
-
-		boolean trigger = false;
-
 		while (pCursor.hasNext()) {
-			T p = pCursor.next();
+			pCursor.next();
 			outCursor.next();
 			int xPos = pCursor.getIntPosition(0);
 			int yPos = pCursor.getIntPosition(1);
 
-			int pxmin = (int) (xPos - span >= 0 ? xPos - span : 0);
-			int pymin = (int) (yPos - span >= 0 ? yPos - span : 0);
-
-			int pxmax = (int) (xPos + span <= in.dimension(0) - 1 ? xPos + span
-					: in.dimension(0) - 1);
-			int pymax = (int) (yPos + span <= in.dimension(1) - 1 ? yPos + span
-					: in.dimension(1) - 1);
-
+			int pxmin = (int) (xPos-span);
+			int pymin = (int) (yPos-span);
+			int pxmax = (int) (xPos+span);
+			int pymax = (int) (yPos+span);
+			
 			long[] pmax = { pxmax, pymax };
 			long[] pmin = { pxmin, pymin };
 
@@ -107,9 +99,10 @@ public class NonLocalMeansGrayscale<T extends RealType<T>> implements Op {
 			ArrayList<NeighborhoodPair<T>> nbhPairs = new ArrayList<NeighborhoodPair<T>>();
 
 			Img<T> copy = fac.create(pNeighbors, pNeighbors.firstElement());
-
+			
 			Cursor<T> pNCursor = pNeighbors.cursor();
 			Cursor<T> copyCursor = copy.cursor();
+			
 			while (pNCursor.hasNext()) {
 				pNCursor.next();
 				copyCursor.next();
@@ -122,15 +115,16 @@ public class NonLocalMeansGrayscale<T extends RealType<T>> implements Op {
 				toAdd.sigma=sigma;
 				nbhPairs.add(toAdd);
 			}
-
+		
 			Function<NeighborhoodPair<T>, T> weightfunc = new WeightingFunction<NeighborhoodPair<T>, T>();
 
 			Img<T> weights = (Img<T>) ops.map(copy, nbhPairs, weightfunc);
 
 			T nbhsum = (T) new DoubleType();
 			nbhsum.setZero();
+		
 			nbhsum = (T) ops.sum(nbhsum, weights);
-
+			
 			double res_ = 0;
 			Cursor<T> resCursor = weights.cursor();
 			Cursor<T> qCursor2 = pNeighbors.cursor();

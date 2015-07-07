@@ -1,8 +1,9 @@
 package nonLocalMeans;
 
+import ij.ImagePlus;
+
 import java.util.ArrayList;
 
-import ij.ImagePlus;
 import net.imagej.ops.Function;
 import net.imagej.ops.Op;
 import net.imagej.ops.OpService;
@@ -16,11 +17,8 @@ import net.imglib2.algorithm.neighborhood.Shape;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.type.numeric.ARGBDoubleType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.NumericType;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
@@ -77,24 +75,16 @@ public class NonLocalMeansRGB<T extends NumericType<T>> implements Op {
 		Cursor<T> pCursor = in.cursor();
 		Cursor<T> outCursor = outputImage.cursor();
 
-		Iterable<Neighborhood<T>> neighbors = shape
-				.neighborhoodsSafe(borderCroppedOffset);
-
-		boolean trigger = false;
-
 		while (pCursor.hasNext()) {
-			T p = pCursor.next();
+			pCursor.next();
 			outCursor.next();
 			int xPos = pCursor.getIntPosition(0);
 			int yPos = pCursor.getIntPosition(1);
 
-			int pxmin = (int) (xPos - span >= 0 ? xPos - span : 0);
-			int pymin = (int) (yPos - span >= 0 ? yPos - span : 0);
-
-			int pxmax = (int) (xPos + span <= in.dimension(0) - 1 ? xPos + span
-					: in.dimension(0) - 1);
-			int pymax = (int) (yPos + span <= in.dimension(1) - 1 ? yPos + span
-					: in.dimension(1) - 1);
+			int pxmin = (int) (xPos-span);
+			int pymin = (int) (yPos-span);
+			int pxmax = (int) (xPos+span);
+			int pymax = (int) (yPos+span);
 
 			long[] pmax = { pxmax, pymax };
 			long[] pmin = { pxmin, pymin };

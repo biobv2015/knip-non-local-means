@@ -63,7 +63,7 @@ public class NonLocalMeans<T extends NumericType<T>> implements Op{
 		final ImageJ ij = new ImageJ();
 
 		//Open an image to work with in imagej
-		File file = new File( "C:/Users/fv/Desktop/test/test.tif" );
+		File file = new File( "C:/Users/fv/Desktop/test/blobs.tif" );
 		ImagePlus imp =  new Opener().openImage( file.getAbsolutePath() );
 
         //ij.ui().showUI();

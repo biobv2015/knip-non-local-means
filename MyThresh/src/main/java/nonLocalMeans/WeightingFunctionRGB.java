@@ -25,7 +25,7 @@ public class WeightingFunctionRGB<I extends NeighborhoodPair<O>, O extends Numer
 			h=0.35*input.sigma;
 		}
 
-		double sigma2 = 2 * Math.pow(input.sigma, 2);
+		double sigma2 = 2 *input.sigma*input.sigma;
 		double dist = calcDistance(input);
 
 		
@@ -35,7 +35,7 @@ public class WeightingFunctionRGB<I extends NeighborhoodPair<O>, O extends Numer
 
 		ARGBDoubleType result = new ARGBDoubleType();
 
-		result.setA(Math.pow((Math.E), (-(maxdistance / Math.pow(h, 2)))));
+		result.setA(Math.pow((Math.E), (-(maxdistance / h*h))));
 
 		return (O) result;
 	}
@@ -53,13 +53,13 @@ public class WeightingFunctionRGB<I extends NeighborhoodPair<O>, O extends Numer
 			// TODO
 			int pValue = ((ARGBType) pCursor.get()).get();
 			int qValue = ((ARGBType) qCursor.get()).get();
-			dresult += Math.pow(ARGBType.blue(pValue) - ARGBType.blue(qValue),2); 
-			dresult += Math.pow(ARGBType.green(pValue) - ARGBType.green(qValue),2); 
-			dresult += Math.pow(ARGBType.red(pValue) - ARGBType.red(qValue),2); 
+			dresult += (ARGBType.blue(pValue) - ARGBType.blue(qValue))*(ARGBType.blue(pValue) - ARGBType.blue(qValue)); 
+			dresult += (ARGBType.green(pValue) - ARGBType.green(qValue))*(ARGBType.green(pValue) - ARGBType.green(qValue)); 
+			dresult += (ARGBType.red(pValue) - ARGBType.red(qValue))*(ARGBType.red(pValue) - ARGBType.red(qValue)); 
 
 		}
 
-		dresult = dresult / (3 * Math.pow((input.pNeighbors.dimension(0)), 2));
+		dresult = dresult / 3*input.pNeighbors.dimension(0)*input.pNeighbors.dimension(0);
 
 		return dresult;
 
