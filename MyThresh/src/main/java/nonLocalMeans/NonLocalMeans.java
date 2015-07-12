@@ -30,7 +30,7 @@ import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-@Plugin(type = Op.class, name = "non_local_means")
+@Plugin(type = Op.class, name = "non_local_mean")
 public class NonLocalMeans<T extends NumericType<T>> implements Op{
 
 	@Parameter(type = ItemIO.OUTPUT)
@@ -63,13 +63,19 @@ public class NonLocalMeans<T extends NumericType<T>> implements Op{
 		final ImageJ ij = new ImageJ();
 
 		//Open an image to work with in imagej
-		File file = new File( "C:/Users/fv/Desktop/test/blobs.tif" );
+		File file = new File( "C:/Users/fv/Desktop/test/input_1.tif" );
 		ImagePlus imp =  new Opener().openImage( file.getAbsolutePath() );
-
+		
         //ij.ui().showUI();
+		Img in;
+		if(imp.getBitDepth()==24){
+			in = ImageJFunctions.wrapRGBA(imp);
+		}else{
+			in = ImageJFunctions.wrapReal(imp);
+		}
         
 		// Run our op
-		final Object threshimg = ij.op().run("non_local_means", imp, 15, 3);
+		final Object threshimg = ij.op().run("non_local_means", in, 15, 5);
 		long stopTime = System.currentTimeMillis();
 		System.out.println((stopTime-startTime) + " ms overall");
 		// And display the result!

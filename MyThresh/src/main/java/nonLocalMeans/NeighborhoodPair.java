@@ -11,4 +11,5 @@ public class NeighborhoodPair<T> {
 	T q;
 	//workaround
 	double sigma;
+	long span=0;
 }

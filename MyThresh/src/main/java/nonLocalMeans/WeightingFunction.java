@@ -31,7 +31,7 @@ public class WeightingFunction<I extends NeighborhoodPair<O>, O extends RealType
 
 		DoubleType result = new DoubleType();
 
-		result.setReal(Math.pow((Math.E), (-(maxdistance / (h*h)))));
+		result.setReal(Math.pow(Math.E, (-(maxdistance / (h*h) ) )));
 
 		return (O) result;
 	}
@@ -50,11 +50,15 @@ public class WeightingFunction<I extends NeighborhoodPair<O>, O extends RealType
 					- qCursor.get().getRealDouble())*(pCursor.get().getRealDouble()
 					- qCursor.get().getRealDouble());
 		}
+		double div=1;
+		if(input.span!=0){
+			div = (2*input.span+1)*(2*input.span+1);
+		}else{
+			div = input.pNeighbors.dimension(0)*input.pNeighbors.dimension(0);
+		}
 
-		dresult = dresult / input.pNeighbors.dimension(0)*input.pNeighbors.dimension(0);
-
+		dresult = dresult / div;
 		return dresult;
-
 	}
 
 }

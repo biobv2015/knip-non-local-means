@@ -4,6 +4,7 @@ import ij.ImagePlus;
 
 import java.util.ArrayList;
 
+import net.imagej.ops.Contingent;
 import net.imagej.ops.Function;
 import net.imagej.ops.Op;
 import net.imagej.ops.OpService;
@@ -19,21 +20,23 @@ import net.imglib2.img.ImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.NumericType;
+import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
 import org.scijava.ItemIO;
+import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-@Plugin(type = Op.class, name = "non_local_means_rgb")
-public class NonLocalMeansRGB<T extends NumericType<T>> implements Op {
+@Plugin(type = Op.class, name = "non_local_means")
+public class NonLocalMeansRGB<T extends NumericType<T>> implements Op,Contingent {
 
 	@Parameter(type = ItemIO.OUTPUT)
 	private Img<T> outputImage;
 
 	@Parameter
-	private ImagePlus inputImage;
+	private Img<T> inputImage;
 
 	@Parameter
 	private double sigma;
@@ -48,8 +51,9 @@ public class NonLocalMeansRGB<T extends NumericType<T>> implements Op {
 	public void run() {
 		// TODO Auto-generated method stub
 
-		Img<T> in = (Img<T>) ImageJFunctions.wrapRGBA(inputImage);
-
+//		Img<T> in = (Img<T>) ImageJFunctions.wrapRGBA(inputImage);
+		Img<T> in =inputImage;
+		
 		RandomAccessible<T> border = Views.extendZero(in);
 
 		long[] min = new long[in.numDimensions()];
@@ -147,5 +151,14 @@ public class NonLocalMeansRGB<T extends NumericType<T>> implements Op {
 		}
 		ImageJFunctions.show(outputImage);
 
+	}
+
+	@Override
+	public boolean conforms() {
+		// TODO Auto-generated method stub
+		if(inputImage.firstElement() instanceof ARGBType){
+			return true;
+		}else{
+		return false;}
 	}
 }

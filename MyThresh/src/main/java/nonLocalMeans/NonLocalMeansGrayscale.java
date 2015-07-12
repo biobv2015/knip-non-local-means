@@ -4,6 +4,7 @@ import ij.ImagePlus;
 
 import java.util.ArrayList;
 
+import net.imagej.ops.Contingent;
 import net.imagej.ops.Function;
 import net.imagej.ops.Op;
 import net.imagej.ops.OpService;
@@ -26,14 +27,14 @@ import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-@Plugin(type = Op.class, name = "non_local_means_gs")
-public class NonLocalMeansGrayscale<T extends RealType<T>> implements Op {
+@Plugin(type = Op.class, name = "non_local_means")
+public class NonLocalMeansGrayscale<T extends RealType<T>> implements Op, Contingent {
 
 	@Parameter(type = ItemIO.OUTPUT)
 	private Img<T> outputImage;
 
 	@Parameter
-	private ImagePlus inputImage;
+	private Img<T> inputImage;
 
 	@Parameter
 	private double sigma;
@@ -47,7 +48,8 @@ public class NonLocalMeansGrayscale<T extends RealType<T>> implements Op {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		Img<T> in = ImageJFunctions.wrapReal(inputImage);
+//		Img<T> in = ImageJFunctions.wrapReal(inputImage);
+		Img<T> in = inputImage;
 		
 		RandomAccessible<T> border = Views.extendZero(in);
 
@@ -74,6 +76,12 @@ public class NonLocalMeansGrayscale<T extends RealType<T>> implements Op {
 		Cursor<T> pCursor = in.cursor();
 		Cursor<T> outCursor = outputImage.cursor();
 
+		//--------------
+//		ArrayList<IntervalView<T>> inviews = new ArrayList<IntervalView<T>>();
+//		@SuppressWarnings("unchecked")
+//		Function<IntervalView<T>,T> nlmf = (Function<IntervalView<T>, T>) ops.op("nlmgsfunc", RealType.class,IntervalView.class,sigma,shape,fac,span);
+//		
+		
 		while (pCursor.hasNext()) {
 			pCursor.next();
 			outCursor.next();
@@ -90,6 +98,11 @@ public class NonLocalMeansGrayscale<T extends RealType<T>> implements Op {
 
 			IntervalView<T> pNeighbors = Views.interval(borderCroppedOffset,
 					pmin, pmax);
+			
+			//---------------------
+//			inviews.add(pNeighbors);
+			//----------------------
+			
 			IterableInterval<Neighborhood<T>> qneighbors = shape
 					.neighborhoodsSafe(pNeighbors);
 
@@ -136,8 +149,20 @@ public class NonLocalMeansGrayscale<T extends RealType<T>> implements Op {
 			outCursor.get().setReal((1 / nbhsum.getRealDouble()) * res_);
 
 		}
+		//--------------------
+//		ops.map(outputImage,inviews,nlmf);
+		
 		ImageJFunctions.show(outputImage);
 
+	}
+
+	@Override
+	public boolean conforms() {
+		// TODO Auto-generated method stub
+		if(inputImage.firstElement() instanceof RealType){
+			return true;
+		}else{
+		return false;}
 	}
 
 }
