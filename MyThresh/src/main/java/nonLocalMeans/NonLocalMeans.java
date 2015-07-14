@@ -63,7 +63,7 @@ public class NonLocalMeans<T extends NumericType<T>> implements Op{
 		final ImageJ ij = new ImageJ();
 
 		//Open an image to work with in imagej
-		File file = new File( "C:/Users/fv/Desktop/test/input_1.tif" );
+		File file = new File( "C:/Users/fv/Desktop/test/test.tif" );
 		ImagePlus imp =  new Opener().openImage( file.getAbsolutePath() );
 		
         //ij.ui().showUI();
@@ -75,7 +75,7 @@ public class NonLocalMeans<T extends NumericType<T>> implements Op{
 		}
         
 		// Run our op
-		final Object threshimg = ij.op().run("non_local_means", in, 15, 5);
+		final Object threshimg = ij.op().run("nlm", in, 15, 5);
 		long stopTime = System.currentTimeMillis();
 		System.out.println((stopTime-startTime) + " ms overall");
 		// And display the result!

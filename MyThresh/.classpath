@@ -23,5 +23,15 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
+	<classpathentry kind="src" path="/scijava-common"/>
+	<classpathentry kind="lib" path="C:/Users/fv/.m2/repository/org/scijava/scijava-common/2.38.2/scijava-common-2.38.2.jar" sourcepath="C:/Users/fv/.m2/repository/org/scijava/scijava-common/2.38.2/scijava-common-2.38.2-sources.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="org.scijava"/>
+			<attribute name="maven.artifactId" value="scijava-common"/>
+			<attribute name="maven.version" value="2.38.2"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

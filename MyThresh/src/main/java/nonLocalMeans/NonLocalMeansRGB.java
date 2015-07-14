@@ -1,7 +1,5 @@
 package nonLocalMeans;
 
-import ij.ImagePlus;
-
 import java.util.ArrayList;
 
 import net.imagej.ops.Contingent;
@@ -20,7 +18,6 @@ import net.imglib2.img.ImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.NumericType;
-import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
@@ -29,22 +26,22 @@ import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-@Plugin(type = Op.class, name = "non_local_means")
-public class NonLocalMeansRGB<T extends NumericType<T>> implements Op,Contingent {
+@Plugin(type = Op.class, name = "nlm",headless = true)
+public class NonLocalMeansRGB<T extends NumericType<T>> implements Op,Contingent,Command {
 
 	@Parameter(type = ItemIO.OUTPUT)
 	private Img<T> outputImage;
 
-	@Parameter
+	@Parameter(type = ItemIO.INPUT, label = "Image")
 	private Img<T> inputImage;
 
-	@Parameter
+	@Parameter(type = ItemIO.INPUT, label = "sigma")
 	private double sigma;
 
-	@Parameter
+	@Parameter(type = ItemIO.INPUT)
 	private OpService ops;
 
-	@Parameter
+	@Parameter(type = ItemIO.INPUT, label = "span")
 	private long span;
 
 	@Override

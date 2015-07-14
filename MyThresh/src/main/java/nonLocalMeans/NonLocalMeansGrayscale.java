@@ -4,6 +4,7 @@ import ij.ImagePlus;
 
 import java.util.ArrayList;
 
+import net.imagej.ImgPlus;
 import net.imagej.ops.Contingent;
 import net.imagej.ops.Function;
 import net.imagej.ops.Op;
@@ -24,26 +25,30 @@ import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
 
 import org.scijava.ItemIO;
+import org.scijava.command.Command;
+import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
-@Plugin(type = Op.class, name = "non_local_means")
-public class NonLocalMeansGrayscale<T extends RealType<T>> implements Op, Contingent {
+@Plugin(menu = { @Menu(label = "DeveloperPlugins"),
+		@Menu(label = "nlm test") },type = Command.class, name = "nlm", headless=true)
+public class NonLocalMeansGrayscale<T extends RealType<T>> implements  Contingent, Command {
 
 	@Parameter(type = ItemIO.OUTPUT)
 	private Img<T> outputImage;
 
-	@Parameter
+	@Parameter(type = ItemIO.INPUT, label = "Image")
 	private Img<T> inputImage;
 
-	@Parameter
+	@Parameter(type = ItemIO.INPUT, label = "sigma")
 	private double sigma;
 
-	@Parameter
+	@Parameter(type = ItemIO.INPUT)
 	private OpService ops;
 
-	@Parameter
+	@Parameter(type = ItemIO.INPUT, label = "span")
 	private long span;
+
 
 	@Override
 	public void run() {
@@ -63,7 +68,7 @@ public class NonLocalMeansGrayscale<T extends RealType<T>> implements Op, Contin
 
 		ImgFactory<T> fac = in.factory();
 
-		outputImage = fac.create(in, in.firstElement());
+		outputImage =  fac.create(in, in.firstElement());
 
 		RandomAccessibleInterval<T> borderCropped = Views.interval(border, min,
 				max);
