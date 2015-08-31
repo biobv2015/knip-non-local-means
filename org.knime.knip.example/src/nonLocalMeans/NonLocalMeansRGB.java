@@ -14,7 +14,6 @@ import net.imglib2.algorithm.region.localneighborhood.Shape;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.imglib2.view.IntervalView;
@@ -30,7 +29,7 @@ import org.scijava.plugin.Plugin;
 public class NonLocalMeansRGB<T extends RealType<T>> implements Command, Contingent {
 
         @Parameter(type = ItemIO.OUTPUT)
-        private Img<T> outputImage;
+        private Img<DoubleType> outputImage;
 
         @Parameter(type = ItemIO.INPUT, label = "Image")
         private Img<T> inputImage;
@@ -46,15 +45,10 @@ public class NonLocalMeansRGB<T extends RealType<T>> implements Command, Conting
 
         @Override
         public void run() {
-                //TODO: extend borders of the image
                 RandomAccessible<T> extendedImage = Views.extendBorder(inputImage);
                 IntervalView<T> extendedImageCropped = Views.interval(extendedImage, inputImage);
 
-                ImgFactory<T> fac = inputImage.factory();
-                ImgFactory<DoubleType> f2 = new CellImgFactory<DoubleType>(5);
                 ImgFactory<DoubleType> f3 = new ArrayImgFactory<DoubleType>();
-                Img<T> processedImage = inputImage.copy();
-                //                outputImage = inputImage.copy();
 
                 //set span/researchspan in dependency of sigma
                 if (sigma <= 25) {
@@ -109,35 +103,12 @@ public class NonLocalMeansRGB<T extends RealType<T>> implements Command, Conting
 
                 //create research neighborhoods 
                 Shape shape = new RectangleShape((int) (span + research_span), false);
-                Shape shape2 = new RectangleShape((int) (research_span), false);
 
                 IterableInterval<Neighborhood<DoubleType>> rNeighbors = shape.neighborhoodsSafe(channelRcropped);
-                IterableInterval<Neighborhood<DoubleType>> rDistances = shape2.neighborhoodsSafe(channelRcropped);
 
                 IterableInterval<Neighborhood<DoubleType>> gNeighbors = shape.neighborhoodsSafe(channelGcropped);
-                IterableInterval<Neighborhood<DoubleType>> gDistances = shape2.neighborhoodsSafe(channelGcropped);
 
                 IterableInterval<Neighborhood<DoubleType>> bNeighbors = shape.neighborhoodsSafe(channelBcropped);
-                IterableInterval<Neighborhood<DoubleType>> bDistances = shape2.neighborhoodsSafe(channelBcropped);
-
-                //                System.out.println(bNeighbors.dimension(0) + " " + bNeighbors.dimension(1));
-                //                //                System.out.println(bNeighbors.firstElement().dimension(0));
-                //
-
-                //                while (tc.hasNext()) {
-                //                        Neighborhood<DoubleType> nrtc = tc.next();
-                //                        Cursor<DoubleType> fc = nrtc.cursor();
-                //                        while (fc.hasNext()) {
-                //                                System.out.println(fc.next().get());
-                //                        }
-                //                }
-
-                DistanceMatrixFunction<Neighborhood<DoubleType>, Neighborhood<DoubleType>> func = new DistanceMatrixFunction<Neighborhood<DoubleType>, Neighborhood<DoubleType>>(
-                                span, research_span);
-
-                //                Cursor<Neighborhood<DoubleType>> tc = rNeighbors.cursor();
-                //                tc.reset();
-                Cursor<Neighborhood<DoubleType>> dct = rDistances.cursor();
 
                 RGBBundle<Neighborhood<DoubleType>, ArrayList<Double>> bun = new RGBBundle<Neighborhood<DoubleType>, ArrayList<Double>>(span,
                                 research_span);
@@ -158,20 +129,7 @@ public class NonLocalMeansRGB<T extends RealType<T>> implements Command, Conting
                         distancesG.add(bun.test(gNCursor.next(), currentG));
                         distancesB.add(bun.test(bNCursor.next(), currentB));
 
-                        //                                        func.compute(tc.next(), dct.next());
                 }
-
-                //                Iterator<ArrayList<Double>> it = distancesR.iterator();
-                //                while (it.hasNext()) {
-                //                        Iterator<Double> ddd = it.next().iterator();
-                //                        while (ddd.hasNext()) {
-                //                                System.out.println(ddd.next());
-                //                        }
-                //                }
-
-                //                ops.map(rDistances, rNeighbors, func);
-                //                ops.map(gDistances, gNeighbors, func);
-                //                ops.map(bDistances, bNeighbors, func);
 
                 //calc finished distances
                 ArrayList<ArrayList<Double>> allDistances = finalizeDistances(distancesR, distancesG, distancesB);
@@ -234,44 +192,15 @@ public class NonLocalMeansRGB<T extends RealType<T>> implements Command, Conting
                         double weightedValueR = weightedSummedValueR / weightSum;
                         double weightedValueG = weightedSummedValueG / weightSum;
                         double weightedValueB = weightedSummedValueB / weightSum;
-                        System.out.println(rC.get().getRealDouble() + " " + weightedValueR);
 
                         rC.get().setReal(weightedValueR);
                         gC.get().setReal(weightedValueG);
                         bC.get().setReal(weightedValueB);
 
-                        //                        System.out.println(weightedValueR + " " + weightedValueG + " " + weightedValueB);
-
                 }
 
-                outputImage = (Img<T>) channelR.copy();
-
-                //                ArrayList<RGBBundle<T>> combinedNbhs = new ArrayList<RGBBundle<T>>();
-
-                //                Cursor<Neighborhood<DoubleType>> rNbhCursor = rNeighbors.cursor();
-                //                Cursor<Neighborhood<T>> gNbhCursor = gNeighbors.cursor();
-                //                Cursor<Neighborhood<T>> bNbhCursor = bNeighbors.cursor();
-
-                //                Cursor<T> processingCursor = processedImage.cursor();
-                //                while (rNbhCursor.hasNext()) {
-                //                        RGBBundle<T> bundle = new RGBBundle<T>();
-                //                        bundle.r = (rNbhCursor.next());
-                //                        bundle.g = (gNbhCursor.next());
-                //                        bundle.b = (bNbhCursor.next());
-                //
-                //                        combinedNbhs.add(bundle);
-                //                processingCursor.next();
-                //                        combinedNbhs.add(calcNlm(bundle));
-                //                }
-
-                //call function to calculate denoising
-                //                PatchingFunctionRGB<RGBBundle<T>, T> function = new PatchingFunctionRGB<RGBBundle<T>, T>(ops, sigma, span, research_span, fac);
-                //                RandomAccessibleInterval<T> outRAI = Views.interval(processedImage, processedImage);
-                //
-                //                ops.map(outRAI, combinedNbhs, function);
-
                 //create finished output image from combined resulting values
-
+                //TODO
         }
 
         public ArrayList<ArrayList<Double>> finalizeDistances(ArrayList<ArrayList<Double>> inDist0, ArrayList<ArrayList<Double>> inDist1,
@@ -300,7 +229,6 @@ public class NonLocalMeansRGB<T extends RealType<T>> implements Command, Conting
                                 double value3 = in2NbhCursor.next();
 
                                 double result = (value3 + value2 + value1) / (3 * (2 * research_span + 1));
-                                //                                System.out.println(value1 + " " + value2 + " " + value3);
                                 outList.add(new Double(result));
                         }
                         resultList.add(outList);
@@ -309,18 +237,6 @@ public class NonLocalMeansRGB<T extends RealType<T>> implements Command, Conting
 
                 return resultList;
         }
-
-        //        public double[] calcNlm(RGBBundle<T> bundle) {
-        //                //get patch to denoise out of the research patch
-        //
-        //                //create nbhs to compare
-        //
-        //                //calc weights
-        //
-        //                //denoise and return denoised values as array
-        //
-        //                return null;
-        //        }
 
         public ArrayList<ArrayList<Double>> calcWeights(ArrayList<ArrayList<Double>> distances) {
                 double h = 0.4;
@@ -360,8 +276,11 @@ public class NonLocalMeansRGB<T extends RealType<T>> implements Command, Conting
 
         @Override
         public boolean conforms() {
-                // TODO Auto-generated method stub
-                return false;
+                if (inputImage.numDimensions() > 2) {
+                        return true;
+                } else {
+                        return false;
+                }
         }
 
 }

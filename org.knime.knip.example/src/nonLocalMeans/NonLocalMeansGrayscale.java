@@ -39,7 +39,6 @@ public class NonLocalMeansGrayscale<T extends RealType<T>> implements Command, C
 
         @Override
         public void run() {
-                long starttime = System.currentTimeMillis();
 
                 //Calculate the span and research-span to be used based on sigma
                 if (sigma <= 15) {
@@ -75,8 +74,6 @@ public class NonLocalMeansGrayscale<T extends RealType<T>> implements Command, C
                 PatchingFunctionGS<Neighborhood<T>, T> patchingFunc = new PatchingFunctionGS<Neighborhood<T>, T>(ops, sigma, span, research_span, fac);
                 //Call patching function on the complete image
                 outputImage = (Img<T>) ops.map(processedImage, researchWindows, patchingFunc);
-                long stoptime = System.currentTimeMillis();
-                System.out.println(stoptime - starttime + " ms");
         }
 
         @Override

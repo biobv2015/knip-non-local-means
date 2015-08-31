@@ -26,9 +26,6 @@ public class RGBBundle<I extends Neighborhood<DoubleType>, O extends ArrayList<D
 
         public O test(I in, O out) {
                 Cursor<DoubleType> inc = in.cursor();
-                //                while (inc.hasNext()) {
-                //                        System.out.println(inc.next().get());
-                //                }
 
                 //make img
                 ImgFactory<DoubleType> fac = new ArrayImgFactory<DoubleType>();
