@@ -185,9 +185,9 @@ public class NonLocalMeansRGB<T extends RealType<T>> implements Command, Conting
 
                                 weightSum += currentWeight;
 
-                                weightedSummedValueR = qValueR * currentWeight;
-                                weightedSummedValueG = qValueG * currentWeight;
-                                weightedSummedValueB = qValueB * currentWeight;
+                                weightedSummedValueR += qValueR * currentWeight;
+                                weightedSummedValueG += qValueG * currentWeight;
+                                weightedSummedValueB += qValueB * currentWeight;
                         }
                         double weightedValueR = weightedSummedValueR / weightSum;
                         double weightedValueG = weightedSummedValueG / weightSum;
@@ -201,6 +201,21 @@ public class NonLocalMeansRGB<T extends RealType<T>> implements Command, Conting
 
                 //create finished output image from combined resulting values
                 //TODO
+
+                outputImage = f3.create(inputImage, dt);
+                Cursor<DoubleType> outputImageCursor = outputImage.cursor();
+                rC = channelR.cursor();
+                gC = channelG.cursor();
+                bC = channelB.cursor();
+                while (rC.hasNext()) {
+                        outputImageCursor.next().set(rC.next());
+                }
+                while (gC.hasNext()) {
+                        outputImageCursor.next().set(gC.next());
+                }
+                while (bC.hasNext()) {
+                        outputImageCursor.next().set(bC.next());
+                }
         }
 
         public ArrayList<ArrayList<Double>> finalizeDistances(ArrayList<ArrayList<Double>> inDist0, ArrayList<ArrayList<Double>> inDist1,
